@@ -12,6 +12,8 @@ NAME = "ATVLibrary"
 ART = 'terminator.png'
 ICON = 'icon.png'
 
+ROOT_URL = "http://atv.at/mediathek"
+
 ####################################################################################################
 
 # This function is initially called by the PMS framework to initialize the plugin. This includes
@@ -28,45 +30,31 @@ def Start():
 
 # This main function will setup the displayed items.
 def MainMenu():
-    oc = ObjectContainer(
-    	objects = [
-	    DirectoryObject(
-		key = Callback(EpisodeMenu),
-		title = "24 Stunden - SOKO Ost",
-		tagline = "Tagline",
-		summary = "A summary....",
-		thumb = "http://atv.at/static/assets/contentset/teaser_image/3125304.jpg",
-	    )
-	]
-    )
+
+    oc = ObjectContainer()
+
+    for item in HTML.ElementFromURL(ROOT_URL).xpath('//ul[@id="list_shows"]/li'):
+    	Log("URL = http://atv.at" + item.xpath('./a[1]/@href')[0])
+	#Log("THUMB = " + item.xpath('./a[1]/img[1]/@src')[0])
+	#Log("TITLE = " + item.xpath('./a[2]/h3[1]/text()')[0])
+	#Log("TAGLINE = " + item.xpath('./a[3]/em[1]/text()')[0])
+	#Log("SUMMARY = " + item.xpath('./a[3]/text()[2]')[0].strip())
+
+	oc.add(DirectoryObject(
+		#key = Callback(EpisodeMenu(url = "http://atv.at" + item.xpath('./a[1]/@href')[0])),
+		key = "http://atv.at" + item.xpath('./a[1]/@href')[0],
+		title =  item.xpath('./a[2]/h3[1]/text()')[0],
+		tagline = item.xpath('./a[3]/em[1]/text()')[0],
+		summary = item.xpath('./a[3]/text()[2]')[0].strip(),
+		thumb = item.xpath('./a[1]/img[1]/@src')[0]
+		)
+	)
+
     return oc
 
-def EpisodeMenu():
-    #dir = MediaContainer()
-    #dir.Append(WebVideoItem("http://atv.at/binaries/asset/tvnext_clip/3161808/video", title = "Test"))
+def EpisodeMenu(url):
 
-    #return dir
     oc = ObjectContainer()
-    oc.add(
-	MovieObject(
-	    title = "Ein Movie",
-	    key = "abacasdjaklsnföalsdgj",
-	    rating_key = "lköasjdsdafklasdflö",
-	    items = [
-		MediaObject(
-	            audio_channels = 2,
-		    audio_codec = AudioCodec.AAC,
-		    video_codec = VideoCodec.H264,
-		    container = Container.MP4,
-		    parts = [
-			PartObject(key="http://atv.at/static/assets/tvnext_clip/video/3305150.mp4"),
-			PartObject(key="http://atv.at/static/assets/video_file/video/3305163.mp4"),
-			PartObject(key="http://atv.at/static/assets/video_file/video/3305140.mp4")
-		    ]    
-	    	)
-	    ]
-	)
-    )
     oc.add(
 	VideoClipObject(
 	    url = "http://atv.at/contentset/3092839-24-stunden---soko-ost/3161808",
