@@ -2,6 +2,7 @@
 from datetime import datetime
 import time
 import re
+import urllib2
 
 ####################################################################################################
 
@@ -57,36 +58,38 @@ def EpisodeMenu(url):
     oc = ObjectContainer()
 
     Log("Entering EpisodeMenu with URL: " + url)
-    page = HTML.ElementFromURL(url).xpath('//ul[@id="player_playlist_items"]/li')
-    Log (page)
-#	Log(item.xpath('./div[@class="description]/p/text()')[0])
+    page = getUrl(url)
+    id1 = re.compile('contentset_id%22%3A(.+?)%', re.DOTALL).findall(page)
+    id2 = re.compile('active_playlist_id%22%3A(.+?)%', re.DOTALL).findall(page)
 
+    newurl = "http://atv.at/player_playlist_page_json/" + id1[0] + "/" + id2[0] + "/1"
+    json = JSON.ObjectFromURL(newurl)
+    numberofitems = json['items_count']
+    total_page_count = json['total_page_count']
 
-    oc.add(
-	EpisodeObject(
-	    title = "Soko OST",
-	    key = url,
-	    rating_key = url + "_rating_key"
-	    #url = "http://atv.at/contentset/3092839-24-stunden---soko-ost/3161808"
+    for idx, item in enumerate(json['1']):
+	id = item['id']
+	oc.add(EpisodeObject(
+	    url = newurl + "/" + str(idx),
+	    title = item['title'] + " | " + item['subtitle'],
+	    summary = item['description'],
+	    thumb = item['thumbnail_url'],
+	    art = item['image_url'],
+	    absolute_index = int(item['keyValueEpisode']),
+	    season = int(item['keyValueSeason']),
+	    )
 	)
-    )
-
-
-    #oc.add(
-#	VideoClipObject(
-#	    url = "http://atv.at/contentset/3092839-24-stunden---soko-ost/3161808",
-#	    title = "Tet"
-	    #duration = 2892,
-	    #original_title = "24 Stunden - SOKO Ost",
-	    #source_title = "ATV.at Mediathek",
-	    #summary = "Die Soko OST wurde vom Bundesministerium f\u00fcr Inneres speziell zur Bek\u00e4mpfung von Einbr\u00fcchen eingesetzt, mit dem Ziel die Aufkl\u00e4rungsquote zu erh\u00f6hen. Von einer gemeinsamen Einsatzzentrale aus kann die Soko ein l\u00e4nder\u00fcbergreifendes Lagebild erstellen und entsprechende Schwerpunkte durchf\u00fchren. Die Arbeit der Einheit macht auch vor Staatsgrenzen nicht halt, weshalb eine gute Kooperation mit den Nachbarstaaten essentiell f\u00fcr den Erfolg ist. Die Soko geht auch gegen Autodiebe und Menschenschlepper vor. ATV begleitet die Beamten bei ihren t\u00e4glichen Eins\u00e4tzen im Kampf gegen das Verbrechen.",
-	    #thumb = "http://devel52-ng.intranet.xoz/atv/uemit/trunk/site/ATV/pub/flash/playcenter/main/images/81x46.png",
-	    #art = "http://atv.at/binaries/asset/tvnext_clip/3161808/player_image"
- # 	)
-  #  )
-
+	    
     return oc 
 		
 
 def ChannelMenu(sender, channel = None):
     return MessageContainer("test", "test" + str(channel))
+
+def getUrl(url):
+    req = urllib2.Request(url)
+    req.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; rv:16.0) Gecko/20100101 Firefox/16.0')
+    response = urllib2.urlopen(req)
+    link=response.read()
+    response.close()
+    return link

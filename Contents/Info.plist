@@ -17,7 +17,7 @@
 	     <key>Identifier</key>
 	     <string>com.plexapp.plugins.atvurlservice</string>
 	     <key>URLPattern</key>
-	     <string>^http://atv.at/contentset/.+</string>
+	     <string>^http://atv.at/player_playlist_page_json/.+</string>
 	     <key>TestURLs</key>
 	     <array>
 	       <string>http://atv.at/contentset/3092839-24-stunden---soko-ost/3161808</string>

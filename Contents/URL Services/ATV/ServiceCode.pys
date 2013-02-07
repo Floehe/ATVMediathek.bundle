@@ -21,38 +21,28 @@ def MetadataObjectForURL(url):
 ####################################################################################################
 def MediaObjectsForURL(url):
 
-    Log("Arrived at MediaObjectsForURL()" + url)
+    Log("Arrived at MediaObjectsForURL() with URL: " + url)
+    urlcomponents = url.split('/')
+    json = JSON.ObjectFromURL(url)
+    urls = [] 
+    Log(urlcomponents[len(urlcomponents)-1])
+    for item in json['1'][int(urlcomponents[len(urlcomponents)-1])]['parts']:
+	urls.append(item['url'])
+
     return [
-      MediaObject(
-        container = Container.MP4,
-        video_codec = VideoCodec.H264,
-        audio_codec = AudioCodec.AAC,
-        audio_channels = 2,
-        bitrate = 1000,
-        optimized_for_streaming = True,
-	parts = [
-		PartObject(key=Callback(PlayVideo, url = url, id = 0)),
-		PartObject(key=Callback(PlayVideo, url = url, id = 1)),
-		PartObject(key=Callback(PlayVideo, url = url, id = 2))
-		#PartObject(key="http://atv.at/static/assets/tvnext_clip/video/3305150.mp4"),
-		#PartObject(key="http://atv.at/static/assets/video_file/video/3305163.mp4"),
-		#PartObject(key="http://atv.at/static/assets/video_file/video/3305140.mp4") 
-	]
-      )
+        MediaObject(
+	    container = Container.MP4,
+	    video_codec = VideoCodec.H264,
+	    audio_codec = AudioCodec.AAC,
+	    audio_channels = 2,
+	    bitrate = 1000,
+	    optimized_for_streaming = True,
+	    parts = [
+	        PartObject(key=urls[0]),
+	        PartObject(key=urls[1]),
+	        PartObject(key=urls[2])
+	    ]
+        )
     ]
 
 ####################################################################################################
-def PlayVideo(url, id):
-
-    urlcomponents = url.split('/')
-    newurl = "http://atv.at/getclip/" + urlcomponents[len(urlcomponents)-1]
-    json = JSON.ObjectFromURL(newurl)
-
-    if id == 0:
-    	video_url = "http://atv.at/static/assets/tvnext_clip/video/" + str(json['clip']['streaming_ids'][0]) + ".mp4"
-    else:
-	video_url = "http://atv.at/static/assets/video_file/video/" + str(json['clip']['streaming_ids'][id]) + ".mp4"
-    
-    Log("NEU VIDEO URL: " + video_url)
-
-    return Redirect(video_url)
