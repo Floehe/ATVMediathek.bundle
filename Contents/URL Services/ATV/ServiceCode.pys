@@ -25,8 +25,8 @@ def MediaObjectsForURL(url):
     urlcomponents = url.split('/')
     json = JSON.ObjectFromURL(url)
     urls = [] 
-    Log(urlcomponents[len(urlcomponents)-1])
-    for item in json['1'][int(urlcomponents[len(urlcomponents)-1])]['parts']:
+    #Log(urlcomponents[len(urlcomponents)-1])
+    for item in json[str(int(urlcomponents[len(urlcomponents)-2]))][int(urlcomponents[len(urlcomponents)-1])]['parts']:
 	urls.append(item['url'])
 
     return [
