@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>com.plexapp.plugins.atv</string>
+	<string>com.plexapp.plugins.atvmediathek</string>
 	<key>PlexClientPlatforms</key>
 	<string>*</string>
 	<key>PlexFrameworkVersion</key>
@@ -20,7 +20,7 @@
 	     <string>^http://atv.at/player_playlist_page_json/.+</string>
 	     <key>TestURLs</key>
 	     <array>
-	       <string>http://atv.at/contentset/3092839-24-stunden---soko-ost/3161808</string>
+	       <string>http://atv.at/player_playlist_page_json/3178352/0/1/1</string>
 	     </array>
 	   </dict>
 	 </dict>

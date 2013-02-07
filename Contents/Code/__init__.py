@@ -6,9 +6,9 @@ import urllib2
 
 ####################################################################################################
 
-VIDEO_PREFIX = "/video/ATVLibrary"
+VIDEO_PREFIX = "/video/ATVMediathek"
 
-NAME = "ATVLibrary"
+NAME = "ATVMediathek"
 
 ART = 'terminator.png'
 ICON = 'icon.png'
@@ -35,11 +35,6 @@ def MainMenu():
     oc = ObjectContainer()
 
     for item in HTML.ElementFromURL(ROOT_URL).xpath('//ul[@id="list_shows"]/li'):
-	#Log("THUMB = " + item.xpath('./a[1]/img[1]/@src')[0])
-	#Log("TITLE = " + item.xpath('./a[2]/h3[1]/text()')[0])
-	#Log("TAGLINE = " + item.xpath('./a[3]/em[1]/text()')[0])
-	#Log("SUMMARY = " + item.xpath('./a[3]/text()[2]')[0].strip())
-
 	oc.add(DirectoryObject(
 		key = Callback(EpisodeMenu, url="http://atv.at" + item.xpath('./a[1]/@href')[0]),
 		title =  item.xpath('./a[2]/h3[1]/text()')[0],
@@ -73,6 +68,13 @@ def EpisodeMenu(url):
 	    data =  JSON.ObjectFromURL(newurl)
 
         for idx, item in enumerate(data[str(index)]):
+	    try:
+	    	season_int = int(item['keyValueSeason'])
+	    except:
+		season_int = 0	
+
+	    Log("Season: " + str(season_int))
+
 	    oc.add(EpisodeObject(
 	        url = newurl + "/" + str(idx),
 	    	title = item['title'] + " | " + item['subtitle'],
@@ -80,7 +82,7 @@ def EpisodeMenu(url):
 	    	thumb = item['thumbnail_url'],
 	    	art = item['image_url'],
 	    	absolute_index = int(item['keyValueEpisode']),
-	    	season = int(item['keyValueSeason']),
+	    	season = season_int,
 	    	)
 	    )
 	    
