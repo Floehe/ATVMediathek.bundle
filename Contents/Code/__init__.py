@@ -51,7 +51,10 @@ def EpisodeMenu(url):
     oc = ObjectContainer()
 
     #Log("Entering EpisodeMenu with URL: " + url)
-    page = getUrl(url)
+    try:
+    	page = getUrl(url)
+    except:
+	return MessageContainer("Fehler", "Fetching of Information failed, please try again")
     id1 = re.compile('contentset_id%22%3A(.+?)%', re.DOTALL).findall(page)
     id2 = re.compile('active_playlist_id%22%3A(.+?)%', re.DOTALL).findall(page)
 
@@ -65,26 +68,35 @@ def EpisodeMenu(url):
 	    data = json #beacuse we've already fetched it before
 	else:
 	    newurl = "http://atv.at/player_playlist_page_json/" + id1[0] + "/" + id2[0] + "/" + str(index)
-	    data =  JSON.ObjectFromURL(newurl)
+	    try:
+	        data =  JSON.ObjectFromURL(newurl)
+	    except:
+		return MessageContainer("Fehler", "Fetching of Information failed, please try again")
 
         for idx, item in enumerate(data[str(index)]):
 	    try:
 	    	season_int = int(item['keyValueSeason'])
 	    except:
-		season_int = 0	
+		season_int = 0
+	
+	    try:
+		absolute_index_int = int(item['keyValueEpisode'])
+	    except:
+		absolute_index_int = 0
 
-	    Log("Season: " + str(season_int))
-
-	    oc.add(EpisodeObject(
-	        url = newurl + "/" + str(idx),
-	    	title = item['title'] + " | " + item['subtitle'],
-	    	summary = item['description'].replace("[br]", "\n"),
-	    	thumb = item['thumbnail_url'],
-	    	art = item['image_url'],
-	    	absolute_index = int(item['keyValueEpisode']),
-	    	season = season_int,
-	    	)
-	    )
+	    try:
+	        oc.add(EpisodeObject(
+	            url = newurl + "/" + str(idx),
+	    	    title = item['title'] + " | " + item['subtitle'],
+	    	    summary = item['description'].replace("[br]", "\n"),
+	    	    thumb = item['thumbnail_url'],
+	    	    art = item['image_url'],
+	    	    absolute_index = absolute_index_int,
+	    	    season = season_int,
+	    	    )
+	        )
+	    except:
+		return MessageContainer("Fehler", "Fetching of Information failed, please try again")
 	    
     return oc 
 		
