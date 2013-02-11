@@ -24,7 +24,7 @@ def MediaObjectsForURL(url):
     Log("Arrived at MediaObjectsForURL() with URL: " + url)
     urlcomponents = url.split('/')
     try:
-        json = JSON.ObjectFromURL(url)
+        json = JSON.ObjectFromURL(url, cacheTime = CACHE_1HOUR)
     except:
 	raise
 

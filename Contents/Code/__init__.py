@@ -34,7 +34,7 @@ def MainMenu():
 
     oc = ObjectContainer()
 
-    for item in HTML.ElementFromURL(ROOT_URL).xpath('//ul[@id="list_shows"]/li'):
+    for item in HTML.ElementFromURL(ROOT_URL, cacheTime=CACHE_1HOUR).xpath('//ul[@id="list_shows"]/li'):
 	oc.add(DirectoryObject(
 		key = Callback(EpisodeMenu, url="http://atv.at" + item.xpath('./a[1]/@href')[0]),
 		title =  item.xpath('./a[2]/h3[1]/text()')[0],
@@ -59,17 +59,24 @@ def EpisodeMenu(url):
     id2 = re.compile('active_playlist_id%22%3A(.+?)%', re.DOTALL).findall(page)
 
     newurl = "http://atv.at/player_playlist_page_json/" + id1[0] + "/" + id2[0] + "/1"
-    json = JSON.ObjectFromURL(newurl)
+    json = JSON.ObjectFromURL(newurl, cacheTime=CACHE_1HOUR)
     numberofitems = json['items_count']
     total_page_count = int(json['total_page_count'])
 
     for index in range(1,total_page_count+1):
 	if index == 1:
-	    data = json #beacuse we've already fetched it before
-	else:
+	    data = json #because we've already fetched it before
+	elif index > 10:
+		oc.add(NextPageObject(
+		    key = "notimplemented",
+		    title = L('Es gibt noch mehr Videos, aber die Funktion ist noch nicht eingebaut')
+		    )
+		)
+		break
+	else:	    
 	    newurl = "http://atv.at/player_playlist_page_json/" + id1[0] + "/" + id2[0] + "/" + str(index)
 	    try:
-	        data =  JSON.ObjectFromURL(newurl)
+	        data =  JSON.ObjectFromURL(newurl, cacheTime = CACHE_1HOUR)
 	    except:
 		return MessageContainer("Fehler", "Fetching of Information failed, please try again")
 
