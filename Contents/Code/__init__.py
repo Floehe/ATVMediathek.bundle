@@ -63,48 +63,51 @@ def EpisodeMenu(url):
     numberofitems = json['items_count']
     total_page_count = int(json['total_page_count'])
 
-    for index in range(1,total_page_count+1):
-	if index == 1:
-	    data = json #because we've already fetched it before
-	elif index > 10:
-		oc.add(NextPageObject(
-		    key = "notimplemented",
-		    title = L('Es gibt noch mehr Videos, aber die Funktion ist noch nicht eingebaut')
-		    )
-		)
-		break
-	else:	    
-	    newurl = "http://atv.at/player_playlist_page_json/" + id1[0] + "/" + id2[0] + "/" + str(index)
-	    try:
-	        data =  JSON.ObjectFromURL(newurl, cacheTime = CACHE_1HOUR)
-	    except:
-		return MessageContainer("Fehler", "Fetching of Information failed, please try again")
+    @parallelize
+    def GetEpisodes():
+	for index in range(1,total_page_count+1):
+	    @task
+	    def GetEpisode():
+		if index == 1:
+		    data = json #because we've already fetched it before
+		#elif index > 10:
+		#	oc.add(NextPageObject(
+	#		    key = "notimplemented",
+	#		    title = L('Es gibt noch mehr Videos, aber die Funktion ist noch nicht eingebaut')
+	#		    )
+	#		)
+		else:	    
+		    newurl = "http://atv.at/player_playlist_page_json/" + id1[0] + "/" + id2[0] + "/" + str(index)
+		    try:
+			data =  JSON.ObjectFromURL(newurl, cacheTime = CACHE_1HOUR)
+		    except:
+			return MessageContainer("Fehler", "Fetching of Information failed, please try again")
 
-        for idx, item in enumerate(data[str(index)]):
-	    try:
-	    	season_int = int(item['keyValueSeason'])
-	    except:
-		season_int = 0
-	
-	    try:
-		absolute_index_int = int(item['keyValueEpisode'])
-	    except:
-		absolute_index_int = 0
+		for idx, item in enumerate(data[str(index)]):
+		    try:
+			season_int = int(item['keyValueSeason'])
+		    except:
+			season_int = 0
+		
+		    try:
+			absolute_index_int = int(item['keyValueEpisode'])
+		    except:
+			absolute_index_int = 0
 
-	    try:
-	        oc.add(EpisodeObject(
-	            url = newurl + "/" + str(idx),
-	    	    title = item['title'] + " | " + item['subtitle'],
-	    	    summary = item['description'].replace("[br]", "\n"),
-	    	    thumb = item['thumbnail_url'],
-	    	    art = item['image_url'],
-	    	    absolute_index = absolute_index_int,
-	    	    season = season_int,
-	    	    )
-	        )
-	    except:
-		return MessageContainer("Fehler", "Fetching of Information failed, please try again")
-	    
+		    try:
+			oc.add(EpisodeObject(
+			    url = newurl + "/" + str(idx),
+			    title = item['title'] + " | " + item['subtitle'],
+			    summary = item['description'].replace("[br]", "\n"),
+			    thumb = item['thumbnail_url'],
+			    art = item['image_url'],
+			    absolute_index = absolute_index_int,
+			    season = season_int,
+			    )
+			)
+		    except:
+			return MessageContainer("Fehler", "Fetching of Information failed, please try again")
+		    
     return oc 
 		
 def getUrl(url):
